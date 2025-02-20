@@ -5457,18 +5457,17 @@ let api = function Binance( options = {} ) {
              * @param {function} order_update_callback
              * @param {Function} subscribed_callback - subscription callback
              */
-            userFutureData: function userFutureData( margin_call_callback, account_update_callback = undefined, order_update_callback = undefined, subscribed_callback = undefined, account_config_update_callback = undefined ) {
+            userFutureData: function userFutureData( margin_call_callback, account_update_callback = undefined, order_update_callback = undefined, subscribed_callback = undefined, account_config_update_callback = undefined, errorCallback = undefined ) {
                 const url = ( Binance.options.test ) ? fapiTest : fapi;
-
                 let reconnect = () => {
                     if ( Binance.options.reconnect ) userFutureData( margin_call_callback, account_update_callback, order_update_callback, subscribed_callback )
                 }
 
                 apiRequest( url + 'v1/listenKey', {}, function ( error, response ) {
                     if (error || !response || !response.listenKey) {
-                        console.error("Failed to retrieve listenKey, retrying in 10 seconds...");
-                        setTimeout(() => userFutureData(margin_call_callback, account_update_callback, order_update_callback, subscribed_callback), 10000);
-                        return;
+                        if(errorCallback){
+                            return errorCallback(error)
+                        }
                     }
                     Binance.options.listenFutureKey = response.listenKey;
                     setTimeout( function userDataKeepAlive() { // keepalive
